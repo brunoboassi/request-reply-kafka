@@ -1,0 +1,37 @@
+spring:
+  cloud:
+    stream:
+      instanceIndex: 0
+      instanceCount: 2
+      bindings:
+        input:
+          destination: requests
+          group: requestsGroup
+          consumer:
+            partitioned: true
+        output:
+          destination: responses
+          producer:
+            partition-count: 2
+            partition-key-expression: headers['partitionKey']
+        reply:
+          destination: responses
+          group: responseGroup
+          consumer:
+            autoRebalanceEnabled: false
+            topic:
+              replicas-assignment: {"partitions":[{"topic":"responses","partition":0}]}
+            partitioned: true
+        request:
+          destination: requests
+          producer:
+            partition-count: 2
+
+logging:
+  level:
+    root: INFO
+    org:
+      apache:
+        kafka: OFF
+server:
+  port: 0

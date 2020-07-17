@@ -4,6 +4,7 @@ import com.example.demo.consumer.ConsumerApplication;
 import com.example.demo.models.Request;
 import com.example.demo.models.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
@@ -69,13 +70,13 @@ public class DemoApplication {
 	}
 
 	@Bean
-	public RouterFunction<ServerResponse> testWhenMetricPathIsNotMeet(ObjectMapper mapper, QueueGateway gateway) {
+	public RouterFunction<ServerResponse> testWhenMetricPathIsNotMeet(ObjectMapper mapper, QueueGateway gateway, @Value("${spring.cloud.stream.instanceIndex}") String partition) {
 		RouterFunction<ServerResponse> route = RouterFunctions.route(
 				RequestPredicates.path("/magica"),
 				request -> {
 					try {
 						return ServerResponse.ok().body(BodyInserters
-								.fromValue(mapper.readValue(gateway.handle(Request.builder().id(UUID.randomUUID().toString()).origin(1).messageIndex(1).build()), Response.class)));
+								.fromValue(mapper.readValue(gateway.handle(Request.builder().id(UUID.randomUUID().toString()).origin(1).messageIndex(1).build(),partition), Response.class)));
 					} catch (IOException e) {
 						e.printStackTrace();
 						return ServerResponse.badRequest().build();
@@ -108,7 +109,7 @@ public class DemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication app = new SpringApplication(DemoApplication.class);
-		app.setDefaultProperties(Collections.singletonMap("server.port", "8083"));
+		app.setDefaultProperties(Collections.singletonMap("server.port", "0"));
 		app.run(args);
 	}
 
