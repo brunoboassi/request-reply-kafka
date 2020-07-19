@@ -1,8 +1,13 @@
 spring:
   cloud:
     stream:
-      instanceIndex: 0
+      instanceIndex: 1
       instanceCount: 2
+      kafka:
+        bindings:
+          reply:
+            consumer:
+              autoRebalanceEnabled: false
       bindings:
         input:
           destination: requests
@@ -18,9 +23,6 @@ spring:
           destination: responses
           group: responseGroup
           consumer:
-            autoRebalanceEnabled: false
-            topic:
-              replicas-assignment: {"partitions":[{"topic":"responses","partition":0}]}
             partitioned: true
         request:
           destination: requests
